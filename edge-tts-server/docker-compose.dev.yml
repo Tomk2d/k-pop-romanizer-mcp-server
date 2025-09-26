@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  edge-tts-server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: edge-tts-server-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8000
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - LOG_FORMAT=text
+      - ALLOWED_ORIGINS=["chrome-extension://*", "http://localhost:3000", "http://localhost:8080", "http://localhost:5173"]
+      - DEFAULT_VOICE=ko-KR-SunHiNeural
+      - MAX_TEXT_LENGTH=5000
+    volumes:
+      # 개발 시 코드 변경사항 실시간 반영
+      - ./app:/app/app
+      - ./requirements.txt:/app/requirements.txt
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    restart: unless-stopped
+    networks:
+      - edge-tts-network
+
+networks:
+  edge-tts-network:
+    driver: bridge
