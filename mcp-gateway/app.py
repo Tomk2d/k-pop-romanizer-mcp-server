@@ -145,6 +145,15 @@ async def health_check():
     """헬스 체크"""
     return {"status": "healthy", "service": "MCP Gateway"}
 
+@app.get("/mcp")
+async def handle_mcp_get_request_simple():
+    """MCP GET 요청 처리 (PlayMCP 호환성) - 간단한 경로"""
+    # 모든 도구 목록 반환 (MCP 표준 형식)
+    all_tools = get_romanize_tools() + get_tts_tools()
+    return {
+        "tools": all_tools
+    }
+
 @app.get("/mcp/jsonrpc")
 async def handle_mcp_get_request():
     """MCP GET 요청 처리 (PlayMCP 호환성)"""
