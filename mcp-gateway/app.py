@@ -7,7 +7,7 @@ MCP Gateway - 중앙집중형 MCP 서버
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Union
 import httpx
 import asyncio
 import logging
@@ -38,13 +38,13 @@ TTS_SERVER_URL = "http://tts-service:8000"  # 컨테이너 내부에서는 8000 
 # MCP 요청/응답 모델
 class McpRequest(BaseModel):
     jsonrpc: str = "2.0"
-    id: str
+    id: Union[str, int]
     method: str
     params: Optional[Dict[str, Any]] = None
 
 class McpResponse(BaseModel):
     jsonrpc: str = "2.0"
-    id: str
+    id: Union[str, int]
     result: Optional[Dict[str, Any]] = None
     error: Optional[Dict[str, Any]] = None
 
