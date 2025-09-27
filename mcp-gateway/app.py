@@ -151,7 +151,20 @@ async def handle_mcp_post_request(request: McpRequest):
     try:
         logger.info(f"MCP 요청 수신: {request.method}")
         
-        if request.method == "tools/list":
+        if request.method == "initialize":
+            # MCP 초기화 응답
+            return {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {}
+                },
+                "serverInfo": {
+                    "name": "K-Pop Romanizer MCP Server",
+                    "version": "1.0.0"
+                }
+            }
+        
+        elif request.method == "tools/list":
             # 모든 도구 목록 통합 (GET과 동일한 형식으로 반환)
             all_tools = get_romanize_tools() + get_tts_tools()
             return {"tools": all_tools}
@@ -202,7 +215,20 @@ async def handle_mcp_request(request: McpRequest):
     try:
         logger.info(f"MCP 요청 수신: {request.method}")
         
-        if request.method == "tools/list":
+        if request.method == "initialize":
+            # MCP 초기화 응답
+            return {
+                "protocolVersion": "2024-11-05",
+                "capabilities": {
+                    "tools": {}
+                },
+                "serverInfo": {
+                    "name": "K-Pop Romanizer MCP Server",
+                    "version": "1.0.0"
+                }
+            }
+        
+        elif request.method == "tools/list":
             # 모든 도구 목록 통합 (MCP Inspector 호환)
             all_tools = get_romanize_tools() + get_tts_tools()
             return {"tools": all_tools}
