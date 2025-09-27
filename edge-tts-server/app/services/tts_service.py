@@ -95,14 +95,14 @@ class TTSService:
         processed = text.strip()
         
         # 연속된 줄바꿈을 더 긴 휴지로 변환
-        processed = processed.replace('\n\n\n', '. . . ')  # 3개 이상 연속 줄바꿈
-        processed = processed.replace('\n\n', '. . ')      # 2개 연속 줄바꿈 (문단 구분)
-        processed = processed.replace('\n', '. ')          # 단일 줄바꿈 (줄 구분)
+        processed = processed.replace('\n\n\n', ' ... ')  # 3개 이상 연속 줄바꿈
+        processed = processed.replace('\n\n', ' .. ')      # 2개 연속 줄바꿈 (문단 구분)
+        processed = processed.replace('\n', ' . ')         # 단일 줄바꿈 (줄 구분)
         
-        # 연속된 마침표 정리
+        # 기존 마침표와 새로 추가된 마침표 사이 충돌 해결
         import re
-        processed = re.sub(r'\.{4,}', '. . . ', processed)  # 4개 이상 마침표를 3개로
-        processed = re.sub(r'\.{3}(?![\s])', '. . . ', processed)  # 공백없는 3개 마침표
+        processed = re.sub(r'\.(\s*\.)+', ' .. ', processed)  # 연속 마침표를 2개로 정리
+        processed = re.sub(r'\.{3,}', ' ... ', processed)     # 3개 이상 마침표를 3개로
         
         # 불필요한 공백 정리
         processed = re.sub(r'\s+', ' ', processed)
