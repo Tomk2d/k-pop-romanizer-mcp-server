@@ -338,7 +338,10 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
         elif tool_name == "tts_stream":
             # TTS 서버의 스트리밍 API 호출 (스트리밍 데이터 수집)
             try:
-                async with httpx.AsyncClient(timeout=30.0) as client:
+                # 타임아웃을 더 길게 설정 (TTS 생성 시간 고려)
+                timeout = httpx.Timeout(120.0, connect=30.0)  # 총 2분, 연결 30초
+                
+                async with httpx.AsyncClient(timeout=timeout) as client:
                     async with client.stream(
                         "POST",
                         f"{TTS_SERVER_URL}/api/v1/tts/stream",
@@ -348,18 +351,25 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                         
                         # 스트리밍 데이터를 청크 단위로 수집
                         audio_chunks = []
-                        async for chunk in response.aiter_bytes():
-                            audio_chunks.append(chunk)
+                        chunk_count = 0
+                        
+                        async for chunk in response.aiter_bytes(chunk_size=8192):
+                            if chunk:  # 빈 청크 제외
+                                audio_chunks.append(chunk)
+                                chunk_count += 1
+                                if chunk_count % 10 == 0:  # 10개 청크마다 로그
+                                    logger.info(f"TTS 스트리밍 진행 중... 청크 {chunk_count}개 수신")
                         
                         # 전체 오디오 데이터 합치기
                         audio_data = b''.join(audio_chunks)
+                        logger.info(f"TTS 스트리밍 완료: 총 {len(audio_data)} bytes, {chunk_count}개 청크")
                         
                         return McpResponse(
                             id=request.id,
                             result={
                                 "content": [{
                                     "type": "text",
-                                    "text": f"음성 스트리밍 완료!\n오디오 데이터 크기: {len(audio_data)} bytes\n청크 수: {len(audio_chunks)}\n스트리밍 URL: {TTS_SERVER_URL}/api/v1/tts/stream"
+                                    "text": f"음성 스트리밍 완료!\n오디오 데이터 크기: {len(audio_data)} bytes\n청크 수: {chunk_count}\n스트리밍 URL: {TTS_SERVER_URL}/api/v1/tts/stream"
                                 }]
                             }
                         )
