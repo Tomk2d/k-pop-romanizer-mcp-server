@@ -156,7 +156,7 @@ async def handle_mcp_post_request(request: McpRequest) -> McpResponse:
             all_tools = get_romanize_tools() + get_tts_tools()
             return McpResponse(
                 id=request.id,
-                result={"tools": all_tools}
+                result=all_tools
             )
         
         elif request.method == "tools/call":
@@ -227,7 +227,7 @@ async def handle_mcp_request(request: McpRequest) -> McpResponse:
             all_tools = get_romanize_tools() + get_tts_tools()
             return McpResponse(
                 id=request.id,
-                result={"tools": all_tools}
+                result=all_tools
             )
         
         elif request.method == "tools/call":
