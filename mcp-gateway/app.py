@@ -214,18 +214,15 @@ async def handle_mcp_get_request():
     }
 
 @app.post("/mcp/jsonrpc")
-async def handle_mcp_request(request: McpRequest) -> McpResponse:
+async def handle_mcp_request(request: McpRequest):
     """MCP JSON-RPC 요청 처리"""
     try:
         logger.info(f"MCP 요청 수신: {request.method}")
         
         if request.method == "tools/list":
-            # 모든 도구 목록 통합
+            # 모든 도구 목록 통합 (MCP Inspector 호환)
             all_tools = get_romanize_tools() + get_tts_tools()
-            return McpResponse(
-                id=request.id,
-                result=all_tools
-            )
+            return {"tools": all_tools}
         
         elif request.method == "tools/call":
             tool_name = request.params.get("name")
