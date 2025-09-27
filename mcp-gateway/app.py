@@ -38,7 +38,7 @@ TTS_SERVER_URL = "http://tts-service:8000"  # 컨테이너 내부에서는 8000 
 # MCP 요청/응답 모델
 class McpRequest(BaseModel):
     jsonrpc: str = "2.0"
-    id: Union[str, int]
+    id: Optional[Union[str, int]] = None
     method: str
     params: Optional[Dict[str, Any]] = None
 
@@ -167,6 +167,11 @@ async def handle_mcp_post_request(request: McpRequest):
                     }
                 }
             }
+        
+        elif request.method == "notifications/initialized":
+            # MCP 초기화 완료 알림 (응답 불필요)
+            logger.info("MCP 클라이언트 초기화 완료")
+            return None  # 알림에는 응답하지 않음
         
         elif request.method == "tools/list":
             # 모든 도구 목록 통합 (JSON-RPC 2.0 형식)
