@@ -336,16 +336,28 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                 )
         
         elif tool_name == "tts_stream":
-            # TTS 스트리밍 링크 제공
-            return McpResponse(
-                id=request.id,
-                result={
-                    "content": [{
-                        "type": "text",
-                        "text": f"음성 스트리밍: {TTS_SERVER_URL}/api/v1/tts/stream"
-                    }]
-                }
-            )
+            # TTS 서버의 실제 스트리밍 API 호출
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{TTS_SERVER_URL}/api/v1/tts/stream",
+                    json=arguments
+                )
+                response.raise_for_status()
+                
+                # 스트리밍 응답을 base64로 인코딩하여 반환
+                import base64
+                audio_data = response.content
+                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                
+                return McpResponse(
+                    id=request.id,
+                    result={
+                        "content": [{
+                            "type": "text",
+                            "text": f"음성 스트리밍 완료! 오디오 데이터 크기: {len(audio_data)} bytes\n스트리밍 URL: {TTS_SERVER_URL}/api/v1/tts/stream"
+                        }]
+                    }
+                )
         
         else:
             raise HTTPException(status_code=400, detail=f"알 수 없는 TTS 도구: {tool_name}")
