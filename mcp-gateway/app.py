@@ -147,27 +147,35 @@ async def health_check():
 
 @app.post("/mcp")
 async def handle_mcp_post_request(request: McpRequest):
-    """MCP POST 요청 처리 (MCP Inspector 호환)"""
+    """MCP POST 요청 처리 (JSON-RPC 2.0)"""
     try:
         logger.info(f"MCP 요청 수신: {request.method}")
         
         if request.method == "initialize":
-            # MCP 초기화 응답
+            # MCP 초기화 응답 (JSON-RPC 2.0 형식)
             return {
-                "protocolVersion": "2024-11-05",
-                "capabilities": {
-                    "tools": {}
-                },
-                "serverInfo": {
-                    "name": "K-Pop Romanizer MCP Server",
-                    "version": "1.0.0"
+                "jsonrpc": "2.0",
+                "id": request.id,
+                "result": {
+                    "protocolVersion": "2024-11-05",
+                    "capabilities": {
+                        "tools": {}
+                    },
+                    "serverInfo": {
+                        "name": "K-Pop Romanizer MCP Server",
+                        "version": "1.0.0"
+                    }
                 }
             }
         
         elif request.method == "tools/list":
-            # 모든 도구 목록 통합 (GET과 동일한 형식으로 반환)
+            # 모든 도구 목록 통합 (JSON-RPC 2.0 형식)
             all_tools = get_romanize_tools() + get_tts_tools()
-            return {"tools": all_tools}
+            return {
+                "jsonrpc": "2.0", 
+                "id": request.id,
+                "result": {"tools": all_tools}
+            }
         
         elif request.method == "tools/call":
             tool_name = request.params.get("name")
@@ -176,20 +184,40 @@ async def handle_mcp_post_request(request: McpRequest):
             # 로마자 변환 도구
             if tool_name.startswith("romanize_"):
                 result = await call_romanize_server(request)
-                return {"content": [{"type": "text", "text": str(result)}]}
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {"content": [{"type": "text", "text": str(result)}]}
+                }
             # TTS 도구
             elif tool_name.startswith("tts_"):
                 result = await call_tts_server(request)
-                return {"content": [{"type": "text", "text": str(result)}]}
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "result": {"content": [{"type": "text", "text": str(result)}]}
+                }
             else:
-                return {"error": f"알 수 없는 도구: {tool_name}"}
+                return {
+                    "jsonrpc": "2.0",
+                    "id": request.id,
+                    "error": {"code": -32601, "message": f"알 수 없는 도구: {tool_name}"}
+                }
         
         else:
-            return {"error": f"지원하지 않는 메서드: {request.method}"}
+            return {
+                "jsonrpc": "2.0",
+                "id": request.id,
+                "error": {"code": -32601, "message": f"지원하지 않는 메서드: {request.method}"}
+            }
     
     except Exception as e:
         logger.error(f"MCP 요청 처리 오류: {str(e)}")
-        return {"error": f"Internal error: {str(e)}"}
+        return {
+            "jsonrpc": "2.0",
+            "id": getattr(request, 'id', 'unknown'),
+            "error": {"code": -32603, "message": "Internal error", "data": str(e)}
+        }
 
 @app.get("/mcp")
 async def handle_mcp_get_request_simple():
