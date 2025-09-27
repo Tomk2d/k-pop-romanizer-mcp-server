@@ -87,13 +87,13 @@ def get_tts_tools() -> List[Dict[str, Any]]:
     return [
         {
             "name": "tts_synthesize", 
-            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. 가사나 시 등 여러 줄 텍스트 지원.",
+            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. 가사나 시 등 여러 줄 텍스트 지원. 예시: '사랑해요\\n너무 보고 싶어요\\n\\n다시 만나요'",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "변환할 텍스트 (줄바꿈 \\n 지원, 가사나 시 등 여러 줄 텍스트 입력 가능)"
+                        "description": "변환할 텍스트. 줄바꿈(\\n) 포함 가능. 예시: '첫 번째 줄\\n두 번째 줄\\n\\n새로운 문단'"
                     },
                     "voice": {
                         "type": "string",
@@ -121,13 +121,13 @@ def get_tts_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "tts_stream",
-            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. 가사나 시 등 여러 줄 텍스트 지원.",
+            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. 가사나 시 등 여러 줄 텍스트 지원. 예시: '눈물이 난다 이 길을 걸으면\\nnunmuri nanda i kireul keoreumyeon\\n\\n그 사람 손길이 자꾸 생각이 난다'",
             "inputSchema": {
                 "type": "object", 
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "변환할 텍스트 (줄바꿈 \\n 지원, 가사나 시 등 여러 줄 텍스트 입력 가능)"
+                        "description": "변환할 텍스트. 줄바꿈(\\n) 포함 가능. K-pop 가사 예시: '사랑이란 게 참 쓰린 거더라\\n잡으려 할수록 더 멀어지더라'"
                     },
                     "voice": {
                         "type": "string",
