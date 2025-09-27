@@ -146,18 +146,15 @@ async def health_check():
     return {"status": "healthy", "service": "MCP Gateway"}
 
 @app.post("/mcp")
-async def handle_mcp_post_request(request: McpRequest) -> McpResponse:
-    """MCP POST 요청 처리 (JSON-RPC)"""
+async def handle_mcp_post_request(request: McpRequest):
+    """MCP POST 요청 처리 (MCP Inspector 호환)"""
     try:
         logger.info(f"MCP 요청 수신: {request.method}")
         
         if request.method == "tools/list":
-            # 모든 도구 목록 통합
+            # 모든 도구 목록 통합 (GET과 동일한 형식으로 반환)
             all_tools = get_romanize_tools() + get_tts_tools()
-            return McpResponse(
-                id=request.id,
-                result=all_tools
-            )
+            return {"tools": all_tools}
         
         elif request.method == "tools/call":
             tool_name = request.params.get("name")
