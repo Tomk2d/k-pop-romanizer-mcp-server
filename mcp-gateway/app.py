@@ -346,12 +346,15 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
             volume = arguments.get("volume", "+0%")
             pitch = arguments.get("pitch", "+0Hz")
             
-            # URL 인코딩
+            # URL 인코딩 (모든 파라미터)
             encoded_text = urllib.parse.quote(text)
             encoded_voice = urllib.parse.quote(voice)
+            encoded_rate = urllib.parse.quote(rate)
+            encoded_volume = urllib.parse.quote(volume)
+            encoded_pitch = urllib.parse.quote(pitch)
             
             # 완성된 GET URL 생성
-            stream_url = f"https://k-pop-romanizer.duckdns.org/tts/api/v1/tts/stream?text={encoded_text}&voice={encoded_voice}&rate={rate}&volume={volume}&pitch={pitch}"
+            stream_url = f"https://k-pop-romanizer.duckdns.org/tts/api/v1/tts/stream?text={encoded_text}&voice={encoded_voice}&rate={encoded_rate}&volume={encoded_volume}&pitch={encoded_pitch}"
             
             return McpResponse(
                 id=request.id,
