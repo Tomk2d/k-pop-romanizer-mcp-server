@@ -86,14 +86,14 @@ def get_tts_tools() -> List[Dict[str, Any]]:
     """TTS 도구 목록"""
     return [
         {
-            "name": "tts_synthesize",
-            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다.",
+            "name": "tts_synthesize", 
+            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. 가사나 시 등 여러 줄 텍스트 지원.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "변환할 텍스트"
+                        "description": "변환할 텍스트 (줄바꿈 \\n 지원, 가사나 시 등 여러 줄 텍스트 입력 가능)"
                     },
                     "voice": {
                         "type": "string",
@@ -121,13 +121,13 @@ def get_tts_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "tts_stream",
-            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다.",
+            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. 가사나 시 등 여러 줄 텍스트 지원.",
             "inputSchema": {
-                "type": "object",
+                "type": "object", 
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "변환할 텍스트"
+                        "description": "변환할 텍스트 (줄바꿈 \\n 지원, 가사나 시 등 여러 줄 텍스트 입력 가능)"
                     },
                     "voice": {
                         "type": "string",
