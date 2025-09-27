@@ -336,25 +336,41 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                 )
         
         elif tool_name == "tts_stream":
-            # TTS 서버의 실제 스트리밍 API 호출
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{TTS_SERVER_URL}/api/v1/tts/stream",
-                    json=arguments
-                )
-                response.raise_for_status()
-                
-                # 스트리밍 응답을 base64로 인코딩하여 반환
-                import base64
-                audio_data = response.content
-                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-                
+            # TTS 서버의 스트리밍 API 호출 (스트리밍 데이터 수집)
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    async with client.stream(
+                        "POST",
+                        f"{TTS_SERVER_URL}/api/v1/tts/stream",
+                        json=arguments
+                    ) as response:
+                        response.raise_for_status()
+                        
+                        # 스트리밍 데이터를 청크 단위로 수집
+                        audio_chunks = []
+                        async for chunk in response.aiter_bytes():
+                            audio_chunks.append(chunk)
+                        
+                        # 전체 오디오 데이터 합치기
+                        audio_data = b''.join(audio_chunks)
+                        
+                        return McpResponse(
+                            id=request.id,
+                            result={
+                                "content": [{
+                                    "type": "text",
+                                    "text": f"음성 스트리밍 완료!\n오디오 데이터 크기: {len(audio_data)} bytes\n청크 수: {len(audio_chunks)}\n스트리밍 URL: {TTS_SERVER_URL}/api/v1/tts/stream"
+                                }]
+                            }
+                        )
+            except Exception as stream_error:
+                logger.error(f"TTS 스트리밍 오류: {str(stream_error)}")
                 return McpResponse(
                     id=request.id,
                     result={
                         "content": [{
-                            "type": "text",
-                            "text": f"음성 스트리밍 완료! 오디오 데이터 크기: {len(audio_data)} bytes\n스트리밍 URL: {TTS_SERVER_URL}/api/v1/tts/stream"
+                            "type": "text", 
+                            "text": f"TTS 스트리밍 오류가 발생했습니다: {str(stream_error)}\n직접 접근: {TTS_SERVER_URL}/api/v1/tts/stream"
                         }]
                     }
                 )
