@@ -162,38 +162,21 @@ async def handle_mcp_post_request(request: McpRequest):
             
             # 로마자 변환 도구
             if tool_name.startswith("romanize_"):
-                return await call_romanize_server(request)
+                result = await call_romanize_server(request)
+                return {"content": [{"type": "text", "text": str(result)}]}
             # TTS 도구
             elif tool_name.startswith("tts_"):
-                return await call_tts_server(request)
+                result = await call_tts_server(request)
+                return {"content": [{"type": "text", "text": str(result)}]}
             else:
-                return McpResponse(
-                    id=request.id,
-                    error={
-                        "code": -32601,
-                        "message": f"알 수 없는 도구: {tool_name}"
-                    }
-                )
+                return {"error": f"알 수 없는 도구: {tool_name}"}
         
         else:
-            return McpResponse(
-                id=request.id,
-                error={
-                    "code": -32601,
-                    "message": f"지원하지 않는 메서드: {request.method}"
-                }
-            )
+            return {"error": f"지원하지 않는 메서드: {request.method}"}
     
     except Exception as e:
         logger.error(f"MCP 요청 처리 오류: {str(e)}")
-        return McpResponse(
-            id=request.id,
-            error={
-                "code": -32603,
-                "message": "Internal error",
-                "data": str(e)
-            }
-        )
+        return {"error": f"Internal error: {str(e)}"}
 
 @app.get("/mcp")
 async def handle_mcp_get_request_simple():
@@ -242,14 +225,7 @@ async def handle_mcp_request(request: McpRequest):
     
     except Exception as e:
         logger.error(f"MCP 요청 처리 중 오류: {str(e)}")
-        return McpResponse(
-            id=request.id,
-            error={
-                "code": -32603,
-                "message": "Internal error",
-                "data": str(e)
-            }
-        )
+        return {"error": f"Internal error: {str(e)}"}
 
 async def call_romanize_server(request: McpRequest) -> McpResponse:
     """로마자 변환 서버 호출"""
