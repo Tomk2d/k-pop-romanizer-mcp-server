@@ -145,6 +145,11 @@ async def health_check():
     """헬스 체크"""
     return {"status": "healthy", "service": "MCP Gateway"}
 
+@app.post("/mcp")
+async def handle_mcp_post_request(request: McpRequest) -> McpResponse:
+    """MCP POST 요청 처리 (JSON-RPC)"""
+    return await handle_mcp_request(request)
+
 @app.get("/mcp")
 async def handle_mcp_get_request_simple():
     """MCP GET 요청 처리 (PlayMCP 호환성) - 간단한 경로"""
