@@ -148,7 +148,55 @@ async def health_check():
 @app.post("/mcp")
 async def handle_mcp_post_request(request: McpRequest) -> McpResponse:
     """MCP POST 요청 처리 (JSON-RPC)"""
-    return await handle_mcp_request(request)
+    try:
+        logger.info(f"MCP 요청 수신: {request.method}")
+        
+        if request.method == "tools/list":
+            # 모든 도구 목록 통합
+            all_tools = get_romanize_tools() + get_tts_tools()
+            return McpResponse(
+                id=request.id,
+                result={"tools": all_tools}
+            )
+        
+        elif request.method == "tools/call":
+            tool_name = request.params.get("name")
+            logger.info(f"도구 호출: {tool_name}")
+            
+            # 로마자 변환 도구
+            if tool_name.startswith("romanize_"):
+                return await call_romanize_server(request)
+            # TTS 도구
+            elif tool_name.startswith("tts_"):
+                return await call_tts_server(request)
+            else:
+                return McpResponse(
+                    id=request.id,
+                    error={
+                        "code": -32601,
+                        "message": f"알 수 없는 도구: {tool_name}"
+                    }
+                )
+        
+        else:
+            return McpResponse(
+                id=request.id,
+                error={
+                    "code": -32601,
+                    "message": f"지원하지 않는 메서드: {request.method}"
+                }
+            )
+    
+    except Exception as e:
+        logger.error(f"MCP 요청 처리 오류: {str(e)}")
+        return McpResponse(
+            id=request.id,
+            error={
+                "code": -32603,
+                "message": "Internal error",
+                "data": str(e)
+            }
+        )
 
 @app.get("/mcp")
 async def handle_mcp_get_request_simple():
