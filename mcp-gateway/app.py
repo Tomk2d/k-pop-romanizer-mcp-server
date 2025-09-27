@@ -336,54 +336,58 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                 )
         
         elif tool_name == "tts_stream":
-            # TTS 서버의 스트리밍 API 호출 (스트리밍 데이터 수집)
-            try:
-                # 타임아웃을 더 길게 설정 (TTS 생성 시간 고려)
-                timeout = httpx.Timeout(120.0, connect=30.0)  # 총 2분, 연결 30초
-                
-                async with httpx.AsyncClient(timeout=timeout) as client:
-                    async with client.stream(
-                        "POST",
-                        f"{TTS_SERVER_URL}/api/v1/tts/stream",
-                        json=arguments
-                    ) as response:
-                        response.raise_for_status()
-                        
-                        # 스트리밍 데이터를 청크 단위로 수집
-                        audio_chunks = []
-                        chunk_count = 0
-                        
-                        async for chunk in response.aiter_bytes(chunk_size=8192):
-                            if chunk:  # 빈 청크 제외
-                                audio_chunks.append(chunk)
-                                chunk_count += 1
-                                if chunk_count % 10 == 0:  # 10개 청크마다 로그
-                                    logger.info(f"TTS 스트리밍 진행 중... 청크 {chunk_count}개 수신")
-                        
-                        # 전체 오디오 데이터 합치기
-                        audio_data = b''.join(audio_chunks)
-                        logger.info(f"TTS 스트리밍 완료: 총 {len(audio_data)} bytes, {chunk_count}개 청크")
-                        
-                        return McpResponse(
-                            id=request.id,
-                            result={
-                                "content": [{
-                                    "type": "text",
-                                    "text": f"음성 스트리밍 완료!\n오디오 데이터 크기: {len(audio_data)} bytes\n청크 수: {chunk_count}\n스트리밍 URL: {TTS_SERVER_URL}/api/v1/tts/stream"
-                                }]
-                            }
-                        )
-            except Exception as stream_error:
-                logger.error(f"TTS 스트리밍 오류: {str(stream_error)}")
-                return McpResponse(
-                    id=request.id,
-                    result={
-                        "content": [{
-                            "type": "text", 
-                            "text": f"TTS 스트리밍 오류가 발생했습니다: {str(stream_error)}\n직접 접근: {TTS_SERVER_URL}/api/v1/tts/stream"
-                        }]
-                    }
-                )
+            # Chrome Extension과 동일한 방식: 스트리밍 URL과 사용법 제공
+            import json
+            
+            # 요청 파라미터 예시 (Chrome Extension에서 사용하는 형식)
+            tts_request = {
+                "text": arguments.get("text", "안녕하세요"),
+                "voice": arguments.get("voice", "ko-KR-HyunsuMultilingualNeural"),
+                "rate": arguments.get("rate", "+10%"),
+                "volume": arguments.get("volume", "+5%"), 
+                "pitch": arguments.get("pitch", "+2Hz")
+            }
+            
+            # JavaScript 코드 예시 제공
+            js_code = f"""
+// JavaScript에서 TTS 스트리밍 사용 방법:
+const response = await fetch('{TTS_SERVER_URL}/api/v1/tts/stream', {{
+    method: 'POST',
+    headers: {{
+        'Content-Type': 'application/json',
+    }},
+    body: JSON.stringify({json.dumps(tts_request, ensure_ascii=False, indent=2)})
+}});
+
+const audioBlob = await response.blob();
+const audioUrl = URL.createObjectURL(audioBlob);
+const audio = new Audio(audioUrl);
+await audio.play();
+"""
+            
+            return McpResponse(
+                id=request.id,
+                result={
+                    "content": [{
+                        "type": "text",
+                        "text": f"""TTS 스트리밍 API 사용법:
+
+🎵 **스트리밍 URL:**
+{TTS_SERVER_URL}/api/v1/tts/stream
+
+📝 **요청 파라미터:**
+{json.dumps(tts_request, ensure_ascii=False, indent=2)}
+
+💻 **JavaScript 사용 예시:**
+{js_code}
+
+⚠️ **주의사항:**
+- POST 요청만 지원 (브라우저 주소창 직접 접근 불가)
+- JavaScript fetch() 또는 curl 사용 필요
+- Chrome Extension에서 검증된 방식입니다"""
+                    }]
+                }
+            )
         
         else:
             raise HTTPException(status_code=400, detail=f"알 수 없는 TTS 도구: {tool_name}")
