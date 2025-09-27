@@ -39,9 +39,13 @@ class TTSService:
             bytes: 오디오 데이터 청크
         """
         try:
+            # 텍스트 전처리: 줄바꿈을 자연스러운 휴지로 변환
+            processed_text = self._preprocess_text(text)
+            
             self.logger.info(
                 "TTS 요청 시작",
-                text_length=len(text),
+                original_length=len(text),
+                processed_length=len(processed_text),
                 voice=voice,
                 rate=rate,
                 volume=volume,
@@ -50,7 +54,7 @@ class TTSService:
             
             # edge-tts로 음성 생성
             communicate = edge_tts.Communicate(
-                text=text,
+                text=processed_text,
                 voice=voice,
                 rate=rate,
                 volume=volume,
@@ -76,6 +80,35 @@ class TTSService:
                 voice=voice
             )
             raise
+    
+    def _preprocess_text(self, text: str) -> str:
+        """
+        TTS를 위한 텍스트 전처리
+        
+        Args:
+            text: 원본 텍스트
+            
+        Returns:
+            str: 전처리된 텍스트
+        """
+        # 줄바꿈을 적절한 휴지로 변환
+        processed = text.strip()
+        
+        # 연속된 줄바꿈을 더 긴 휴지로 변환
+        processed = processed.replace('\n\n\n', '. . . ')  # 3개 이상 연속 줄바꿈
+        processed = processed.replace('\n\n', '. . ')      # 2개 연속 줄바꿈 (문단 구분)
+        processed = processed.replace('\n', '. ')          # 단일 줄바꿈 (줄 구분)
+        
+        # 연속된 마침표 정리
+        import re
+        processed = re.sub(r'\.{4,}', '. . . ', processed)  # 4개 이상 마침표를 3개로
+        processed = re.sub(r'\.{3}(?![\s])', '. . . ', processed)  # 공백없는 3개 마침표
+        
+        # 불필요한 공백 정리
+        processed = re.sub(r'\s+', ' ', processed)
+        processed = processed.strip()
+        
+        return processed
     
     async def get_available_voices(self) -> List[VoiceInfo]:
         """
