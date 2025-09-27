@@ -87,7 +87,7 @@ def get_tts_tools() -> List[Dict[str, Any]]:
     return [
         {
             "name": "tts_synthesize", 
-            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. 가사나 여러 줄 텍스트의 경우 줄바꿈(\\n)을 반드시 그대로 포함하여 전달하세요. 줄바꿈을 제거하지 마세요!",
+            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. url 형태로 제공 되고, 해당 url 로 다운로드 할 수 있습니다.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -121,7 +121,7 @@ def get_tts_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "tts_stream",
-            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. 가사나 여러 줄 텍스트의 경우 줄바꿈(\\n)을 반드시 그대로 포함하여 전달하세요. 줄바꿈을 제거하지 마세요!",
+            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. url 형태로 제공 되고, 해당 url 로 스트리밍 할 수 있습니다.",
             "inputSchema": {
                 "type": "object", 
                 "properties": {
