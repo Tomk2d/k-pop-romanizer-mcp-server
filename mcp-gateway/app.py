@@ -45,7 +45,7 @@ class McpRequest(BaseModel):
 class McpResponse(BaseModel):
     jsonrpc: str = "2.0"
     id: Union[str, int]
-    result: Optional[Dict[str, Any]] = None
+    result: Optional[Union[Dict[str, Any], List[Dict[str, Any]]]] = None
     error: Optional[Dict[str, Any]] = None
 
 # MCP 도구 정의
