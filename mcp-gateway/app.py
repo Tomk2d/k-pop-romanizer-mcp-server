@@ -320,7 +320,7 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
             import urllib.parse
             
             # 파라미터 추출
-            text = arguments.get("text", "안녕하세요")
+            text = arguments.get("text", "변환할 텍스트를 주세요")
             voice = arguments.get("voice", "ko-KR-SunHiNeural")
             rate = arguments.get("rate", "+0%")
             volume = arguments.get("volume", "+0%")
@@ -342,10 +342,10 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                     "content": [{
                         "type": "text",
                         "text": f"""💾 **TTS 다운로드 URL:**
-{download_url}
+                                    {download_url}
 
-📝 텍스트: {text} | 🎤 음성: {voice}
-💡 위 URL을 브라우저 주소창에 복사해서 붙여넣으면 MP3 파일이 다운로드됩니다!"""
+                                    📝 텍스트: {text}
+                                    💡 위 URL을 클릭하거나 브라우저 주소창에 복사해서 붙여넣으면 MP3 파일이 다운로드됩니다!"""
                     }]
                 }
             )
@@ -379,8 +379,8 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                         "text": f"""🎵 **TTS 재생 URL:**
                                     {stream_url}
 
-                                    📝 텍스트: {text} | 🎤 음성: {voice}
-                                    💡 위 URL을 브라우저 주소창에 복사해서 붙여넣으면 바로 재생됩니다!"""
+                                    📝 텍스트: {text}
+                                    💡 위 URL을 클릭하거나 브라우저 주소창에 복사해서 붙여넣으면 바로 재생됩니다!"""
                     }]
                 }
             )
