@@ -316,24 +316,39 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
         arguments = request.params.get("arguments", {})
         
         if tool_name == "tts_synthesize":
-            # TTS 서버의 REST API 호출
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    f"{TTS_SERVER_URL}/api/v1/tts/synthesize",
-                    json=arguments
-                )
-                response.raise_for_status()
-                
-                # MCP 응답 형식으로 변환
-                return McpResponse(
-                    id=request.id,
-                    result={
-                        "content": [{
-                            "type": "text",
-                            "text": f"음성 파일이 생성되었습니다.\n다운로드: {TTS_SERVER_URL}/api/v1/tts/synthesize\n파일명: audio.mp3"
-                        }]
-                    }
-                )
+            # GET 방식 TTS 다운로드: 브라우저에서 바로 다운로드 가능
+            import urllib.parse
+            
+            # 파라미터 추출
+            text = arguments.get("text", "안녕하세요")
+            voice = arguments.get("voice", "ko-KR-SunHiNeural")
+            rate = arguments.get("rate", "+0%")
+            volume = arguments.get("volume", "+0%")
+            pitch = arguments.get("pitch", "+0Hz")
+            
+            # URL 인코딩 (모든 파라미터)
+            encoded_text = urllib.parse.quote(text)
+            encoded_voice = urllib.parse.quote(voice)
+            encoded_rate = urllib.parse.quote(rate)
+            encoded_volume = urllib.parse.quote(volume)
+            encoded_pitch = urllib.parse.quote(pitch)
+            
+            # 완성된 GET URL 생성
+            download_url = f"https://k-pop-romanizer.duckdns.org/tts/api/v1/tts/synthesize?text={encoded_text}&voice={encoded_voice}&rate={encoded_rate}&volume={encoded_volume}&pitch={encoded_pitch}"
+            
+            return McpResponse(
+                id=request.id,
+                result={
+                    "content": [{
+                        "type": "text",
+                        "text": f"""💾 **TTS 다운로드 URL:**
+{download_url}
+
+📝 텍스트: {text} | 🎤 음성: {voice}
+💡 위 URL을 브라우저 주소창에 복사해서 붙여넣으면 MP3 파일이 다운로드됩니다!"""
+                    }]
+                }
+            )
         
         elif tool_name == "tts_stream":
             # GET 방식 TTS 스트리밍: 브라우저 주소창에서 바로 재생 가능
