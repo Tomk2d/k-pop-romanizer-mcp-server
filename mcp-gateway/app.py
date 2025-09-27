@@ -239,15 +239,17 @@ async def handle_mcp_request(request: McpRequest):
             
             if tool_name.startswith("romanize_"):
                 # 로마자 변환 서버로 전달
-                return await call_romanize_server(request)
+                result = await call_romanize_server(request)
+                return {"content": [{"type": "text", "text": str(result)}]}
             elif tool_name.startswith("tts_"):
                 # TTS 서버로 전달
-                return await call_tts_server(request)
+                result = await call_tts_server(request)
+                return {"content": [{"type": "text", "text": str(result)}]}
             else:
-                raise HTTPException(status_code=400, detail=f"알 수 없는 도구: {tool_name}")
+                return {"error": f"알 수 없는 도구: {tool_name}"}
         
         else:
-            raise HTTPException(status_code=400, detail=f"지원하지 않는 메서드: {request.method}")
+            return {"error": f"지원하지 않는 메서드: {request.method}"}
     
     except Exception as e:
         logger.error(f"MCP 요청 처리 중 오류: {str(e)}")
