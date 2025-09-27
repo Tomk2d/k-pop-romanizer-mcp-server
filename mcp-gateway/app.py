@@ -336,55 +336,43 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                 )
         
         elif tool_name == "tts_stream":
-            # Chrome Extension과 동일한 방식: 스트리밍 URL과 사용법 제공
-            import json
+            # GET 방식 TTS 스트리밍: 브라우저 주소창에서 바로 재생 가능
+            import urllib.parse
             
-            # 요청 파라미터 예시 (Chrome Extension에서 사용하는 형식)
-            tts_request = {
-                "text": arguments.get("text", "안녕하세요"),
-                "voice": arguments.get("voice", "ko-KR-HyunsuMultilingualNeural"),
-                "rate": arguments.get("rate", "+10%"),
-                "volume": arguments.get("volume", "+5%"), 
-                "pitch": arguments.get("pitch", "+2Hz")
-            }
+            # 파라미터 추출
+            text = arguments.get("text", "안녕하세요")
+            voice = arguments.get("voice", "ko-KR-SunHiNeural")
+            rate = arguments.get("rate", "+0%")
+            volume = arguments.get("volume", "+0%")
+            pitch = arguments.get("pitch", "+0Hz")
             
-            # JavaScript 코드 예시 제공
-            js_code = f"""
-// JavaScript에서 TTS 스트리밍 사용 방법:
-const response = await fetch('{TTS_SERVER_URL}/api/v1/tts/stream', {{
-    method: 'POST',
-    headers: {{
-        'Content-Type': 'application/json',
-    }},
-    body: JSON.stringify({json.dumps(tts_request, ensure_ascii=False, indent=2)})
-}});
-
-const audioBlob = await response.blob();
-const audioUrl = URL.createObjectURL(audioBlob);
-const audio = new Audio(audioUrl);
-await audio.play();
-"""
+            # URL 인코딩
+            encoded_text = urllib.parse.quote(text)
+            encoded_voice = urllib.parse.quote(voice)
+            
+            # 완성된 GET URL 생성
+            stream_url = f"https://k-pop-romanizer.duckdns.org/tts/api/v1/tts/stream?text={encoded_text}&voice={encoded_voice}&rate={rate}&volume={volume}&pitch={pitch}"
             
             return McpResponse(
                 id=request.id,
                 result={
                     "content": [{
                         "type": "text",
-                        "text": f"""TTS 스트리밍 API 사용법:
+                        "text": f"""🎵 **TTS 스트리밍 재생 URL:**
 
-🎵 **스트리밍 URL:**
-{TTS_SERVER_URL}/api/v1/tts/stream
+📋 **브라우저에 복사해서 붙여넣으세요:**
+{stream_url}
 
-📝 **요청 파라미터:**
-{json.dumps(tts_request, ensure_ascii=False, indent=2)}
+📝 **입력한 텍스트:** {text}
+🎤 **선택한 음성:** {voice}
+🎛️ **설정:** 속도({rate}), 볼륨({volume}), 음높이({pitch})
 
-💻 **JavaScript 사용 예시:**
-{js_code}
+💡 **사용법:**
+1. 위 URL을 복사하세요
+2. 브라우저 주소창에 붙여넣기
+3. Enter 키를 누르면 음성이 바로 재생됩니다!
 
-⚠️ **주의사항:**
-- POST 요청만 지원 (브라우저 주소창 직접 접근 불가)
-- JavaScript fetch() 또는 curl 사용 필요
-- Chrome Extension에서 검증된 방식입니다"""
+✅ **브라우저 직접 접근 가능** - Chrome Extension 방식보다 더 간단합니다!"""
                     }]
                 }
             )
