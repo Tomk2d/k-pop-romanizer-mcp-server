@@ -361,21 +361,11 @@ async def call_tts_server(request: McpRequest) -> McpResponse:
                 result={
                     "content": [{
                         "type": "text",
-                        "text": f"""🎵 **TTS 스트리밍 재생 URL:**
+                        "text": f"""🎵 **TTS 재생 URL:**
+                                    {stream_url}
 
-📋 **브라우저에 복사해서 붙여넣으세요:**
-{stream_url}
-
-📝 **입력한 텍스트:** {text}
-🎤 **선택한 음성:** {voice}
-🎛️ **설정:** 속도({rate}), 볼륨({volume}), 음높이({pitch})
-
-💡 **사용법:**
-1. 위 URL을 복사하세요
-2. 브라우저 주소창에 붙여넣기
-3. Enter 키를 누르면 음성이 바로 재생됩니다!
-
-✅ **브라우저 직접 접근 가능** - Chrome Extension 방식보다 더 간단합니다!"""
+                                    📝 텍스트: {text} | 🎤 음성: {voice}
+                                    💡 위 URL을 브라우저 주소창에 복사해서 붙여넣으면 바로 재생됩니다!"""
                     }]
                 }
             )
