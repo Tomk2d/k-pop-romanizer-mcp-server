@@ -87,13 +87,13 @@ def get_tts_tools() -> List[Dict[str, Any]]:
     return [
         {
             "name": "tts_synthesize", 
-            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. 줄바꿈이 있는 가사나 긴 텍스트를 처리할 수 있습니다. 줄바꿈이 있는 text 라면 포함해서 주세요.",
+            "description": "한국어 텍스트를 음성으로 변환하여 MP3 파일로 다운로드합니다. 가사나 여러 줄 텍스트의 경우 줄바꿈(\\n)을 반드시 그대로 포함하여 전달하세요. 줄바꿈을 제거하지 마세요!",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "변환할 한국어 텍스트 (여러 줄 가능)"
+                        "description": "변환할 한국어 텍스트. 여러 줄 텍스트인 경우 줄바꿈(\\n)을 절대 제거하지 말고 그대로 포함하세요!"
                     },
                     "voice": {
                         "type": "string",
@@ -121,13 +121,13 @@ def get_tts_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "tts_stream",
-            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. 줄바꿈이 있는 가사나 긴 텍스트를 처리할 수 있습니다. 줄바꿈이 있는 text 라면 포함해서 주세요.",
+            "description": "한국어 텍스트를 음성으로 변환하여 실시간 스트리밍합니다. 가사나 여러 줄 텍스트의 경우 줄바꿈(\\n)을 반드시 그대로 포함하여 전달하세요. 줄바꿈을 제거하지 마세요!",
             "inputSchema": {
                 "type": "object", 
                 "properties": {
                     "text": {
                         "type": "string",
-                        "description": "변환할 한국어 텍스트 (여러 줄 가능)"
+                        "description": "변환할 한국어 텍스트. 여러 줄 텍스트인 경우 줄바꿈(\\n)을 절대 제거하지 말고 그대로 포함하세요!"
                     },
                     "voice": {
                         "type": "string",
